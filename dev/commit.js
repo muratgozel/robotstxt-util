@@ -64,7 +64,7 @@ function commit(argv) {
       )
     )
 
-    const result = commitChanges(newVersion, msg)
+    const result = commitChanges(newVersion, msg, argv.branch)
     if (!result)
       throw new Error('git command error.')
 
