@@ -1,0 +1,33 @@
+{
+  "name": "robotstxt-util",
+  "version": "1.0.0",
+  "description": "RFC 5234 spec compliant robots.txt builder and parser. 🦾",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "NODE_ENV=test jasmine",
+    "commit": "node dev/commit.js commit"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/muratgozel/robotstxt-util.git"
+  },
+  "keywords": [
+    "robots",
+    "robotstxt",
+    "seo",
+    "search-engine-optimization",
+    "robotstxt-parser",
+    "robotstxt-builder",
+    "rfc5234"
+  ],
+  "author": "Murat Gözel <murat@gozel.com.tr>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/muratgozel/robotstxt-util/issues"
+  },
+  "homepage": "https://github.com/muratgozel/robotstxt-util#readme",
+  "devDependencies": {
+    "semver": "^7.3.2",
+    "yargs": "^15.3.1"
+  }
+}
