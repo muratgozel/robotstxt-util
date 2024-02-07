@@ -1,11 +1,14 @@
 {
   "name": "robotstxt-util",
-  "version": "2.0.0",
+  "version": "v1.0.0",
   "description": "RFC 5234 spec compliant robots.txt builder and parser. 🦾",
-  "main": "src/index.js",
+  "main": "build/index.js",
+  "type": "module",
+  "types": "types",
   "scripts": {
-    "test": "NODE_ENV=test jasmine",
-    "commit": "node dev/commit.js commit"
+    "precompile": "rm -rf build/*",
+    "compile": "tsc -p tsconfig.json",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
@@ -20,14 +23,31 @@
     "robotstxt-builder",
     "rfc5234"
   ],
-  "author": "Murat Gözel <murat@gozel.com.tr>",
+  "author": {
+    "name": "Murat Gözel",
+    "email": "murat@gozel.com.tr",
+    "url": "https://gozel.com.tr"
+  },
+  "funding": {
+    "type": "patreon",
+    "url": "https://patreon.com/muratgozel"
+  },
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/muratgozel/robotstxt-util/issues"
   },
   "homepage": "https://github.com/muratgozel/robotstxt-util#readme",
   "devDependencies": {
-    "semver": "^7.3.2",
-    "yargs": "^15.3.1"
+    "@tsconfig/node20": "^20.1.2",
+    "@tsconfig/strictest": "^2.0.1",
+    "@types/node": "^20.10.5",
+    "@typescript-eslint/eslint-plugin": "^6.15.0",
+    "eslint": "^8.45.0",
+    "eslint-config-standard-with-typescript": "^43.0.0",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-n": "^16.5.0",
+    "eslint-plugin-promise": "^6.1.1",
+    "node-releaser": "^2.1.4",
+    "typescript": "^5.1.6"
   }
 }

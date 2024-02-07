@@ -3,8 +3,6 @@ RFC 5234 spec compliant robots.txt builder and parser. 🦾
 
 ![NPM](https://img.shields.io/npm/l/robotstxt-util)
 [![npm version](https://badge.fury.io/js/robotstxt-util.svg)](https://badge.fury.io/js/robotstxt-util)
-![npm bundle size](https://img.shields.io/bundlephobia/min/robotstxt-util)
-![npm](https://img.shields.io/npm/dy/robotstxt-util)
 
 ## Install
 ```sh
@@ -14,7 +12,8 @@ npm i -D robotstxt-util
 ## Use
 Build robots.txt documents on fly:
 ```js
-const RobotsTXT = require('robotstxt-util')
+import RobotsTxt from 'robotstxt-util'
+// or const RobotsTXT = require('robotstxt-util')
 
 const builder = new RobotsTXT()
 const somebot = builder.newGroup('somebot')
@@ -117,8 +116,15 @@ const obj = {
 builder.load(obj)
 ```
 
+## Contributing
+If you're interested in contributing, read the [CONTRIBUTING.md](https://github.com/muratgozel/muratgozel/blob/main/CONTRIBUTING.md) first, please.
+
+---
+
+Version management of this repository done by [releaser](https://github.com/muratgozel/node-releaser) 🚀
+
 ---
 
 Thanks for watching 🐬
 
-[![ko-fi](https://www.ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/F1F1RFO7)
+[![Support me on Patreon](https://cdn.muratgozel.com.tr/support-me-on-patreon.v1.png)](https://patreon.com/muratgozel?utm_medium=organic&utm_source=github_repo&utm_campaign=github&utm_content=join_link)
