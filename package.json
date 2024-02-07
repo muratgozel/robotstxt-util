@@ -1,6 +1,6 @@
 {
   "name": "robotstxt-util",
-  "version": "v2.0.0",
+  "version": "v3.0.0",
   "description": "RFC 5234 spec compliant robots.txt builder and parser. 🦾",
   "main": "build/index.js",
   "type": "module",
