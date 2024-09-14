@@ -4,6 +4,12 @@ RFC 9309 spec compliant robots.txt builder and parser. 🦾 No dependencies, ful
 ![NPM](https://img.shields.io/npm/l/robotstxt-util)
 [![Build status](https://badge.buildkite.com/59019ef6df1cc44bcb5b790bd21f198d1e488c842624c62cd8.svg)](https://buildkite.com/gozel/robotstxt-util)
 
+Before using this library, I recommend you to read the following guide by Google:
+[https://developers.google.com/search/docs/crawling-indexing/robots/intro](https://developers.google.com/search/docs/crawling-indexing/robots/intro)
+
+Note to myself (and contributors):
+[https://www.rfc-editor.org/rfc/rfc9309.html](https://www.rfc-editor.org/rfc/rfc9309.html)
+
 ## Install
 ```sh
 npm i robotstxt-util
