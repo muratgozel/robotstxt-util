@@ -58,7 +58,7 @@
   "homepage": "https://github.com/muratgozel/robotstxt-util#readme",
   "devDependencies": {
     "@eslint/js": "^9.10.0",
-    "@semantic-release/gitlab": "13.2.1",
+    "@semantic-release/github": "^10.3.3",
     "@tsconfig/strictest": "^2.0.5",
     "@types/node": "^22.5.4",
     "commitizen": "^4.3.0",

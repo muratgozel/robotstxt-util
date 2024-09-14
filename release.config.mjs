@@ -7,6 +7,6 @@ export default {
         ['@semantic-release/commit-analyzer', { preset: 'angular' }],
         ['@semantic-release/release-notes-generator', { preset: 'angular' }],
         ['@semantic-release/npm', { npmPublish: true }],
-        ['@semantic-release/gitlab']
+        ['@semantic-release/github']
     ]
 }
