@@ -1,151 +1,161 @@
 export class RobotsTxt {
-    state: State = {
-        data: {
-            groups: {},
-            additional: []
-        },
-        valid: false
-    }
-    reGroupSep = /[\r\n]{2,}/gm
-    validRuleNames = ['allow', 'disallow']
-    validShareFormats = ['json', 'robotstxt']
+    groups: RobotsTxtGroup[] = [];
+    additions: [string, string][] = [];
 
-    constructor (data = '') {
-        if (data.length > 0) {
-            this.parse(this.clean(data))
-        }
-    }
-
-    newGroup(name: string, rules = []) {
-        const self = this
-
-        self.state.data.groups[name] = {rules: rules}
+    newGroup(userAgents: string | string[]) {
+        const self = this;
+        const group = {
+            ua: typeof userAgents === "string" ? [userAgents] : userAgents,
+            allows: [],
+            disallows: [],
+            customRules: {},
+        };
+        const index = self.groups.push(group) - 1;
 
         return {
-            allow: function(p: string | string[]) {
-                p = !Array.isArray(p) ? [p] : p
-                p.map((item) => (self.state.data.groups[name] as StateDataGroup).rules.push({allow: item}))
+            addUserAgent(userAgent: string) {
+                self.groups[index]!.ua.push(userAgent);
             },
-            disallow: function(p: string | string[]) {
-                p = !Array.isArray(p) ? [p] : p
-                p.map((item) => (self.state.data.groups[name] as StateDataGroup).rules.push({disallow: item}))
-            }
-        }
+            allow(path: string) {
+                self.groups[index]!.allows.push(path);
+            },
+            disallow(path: string) {
+                self.groups[index]!.disallows.push(path);
+            },
+            addCustomRule(key: string, value: string) {
+                self.groups[index]!.customRules[key] = value;
+            },
+        };
     }
 
-    newProduct(key: string, value: string) {
-        this.state.data.additional.push({[key]: value})
-        return this
+    add(key: string, value: string) {
+        this.additions.push([key, value]);
     }
 
-    load(obj: StateData) {
-        this.state.data = obj
-        this.state.valid = true
-        return this
+    json() {
+        return {
+            groups: this.groups,
+            additions: this.additions,
+        };
     }
 
-    share(format = 'json') {
-        if (format == 'json') return this.state.data
-        if (format == 'robotstxt') return this.dump()
-
-        throw new Error('Unsupported sharing format. Supported share formats are '+this.validShareFormats.join(', ')+' but you specified ' + format + '.')
-    }
-
-    dump() {
-        const {groups, additional} = this.state.data
-
-        let result = ''
-
-        Object.keys(groups).map(function(name) {
-            result += 'user-agent: ' + name + '\r\n';
-            (groups[name] as StateDataGroup).rules.map(function(ruleobj) {
-                const k = Object.keys(ruleobj)[0] as string
-                result += k + ': ' + (ruleobj[k] as string) + '\r\n'
+    txt() {
+        const groups = this.groups
+            .map((group) => {
+                const lines: string[] = [];
+                group.ua.map((ua) => lines.push(`user-agent: ${ua}`));
+                group.allows.map((allow) => lines.push(`allow: ${allow}`));
+                group.disallows.map((disallow) =>
+                    lines.push(`disallow: ${disallow}`),
+                );
+                Object.keys(group.customRules).map((key) =>
+                    lines.push(`${key}: ${group.customRules[key]}`),
+                );
+                return lines.join("\r\n");
             })
-            result += '\r\n'
-        })
+            .join("\r\n\r\n");
 
-        additional.map(function(addobj) {
-            const k = Object.keys(addobj)[0] as string
-            result += k + ': ' + addobj[k] + '\r\n'
-        })
+        const additions = this.additions
+            .map((arr) => `${arr[0]}: ${arr[1]}`)
+            .join("\r\n");
 
-        result = this.clean(result)
-
-        return result
+        return `${groups}\r\n\r\n${additions}`;
     }
+}
 
-    parse(data: string) {
-        const groupMatches = data.split(this.reGroupSep)
-        if (!groupMatches || groupMatches.length < 1) return this
+export function parseRobotsTxt(data: string) {
+    const robotstxt = new RobotsTxt();
+    const lines = data.split(/\r?\n/).map((line) => trimLine(line));
 
-        const validRuleNames = this.validRuleNames
+    let didContentStart = false;
+    let group: ReturnType<InstanceType<typeof RobotsTxt>["newGroup"]> | null =
+        null;
+    for (const line of lines) {
+        if (canSkipLine(line)) continue;
 
-        this.state.data = groupMatches.reduce(function(memo: StateData, groupData, ind) {
-            const lines = groupData.split(/[\r\n]+/g)
-
-            const isGroup = /((user-agent))/gi.test(lines[0] ?? '')
-            if (ind === 0 && !isGroup) throw new Error('Document must have at least one group starting with "user-agent" at the beginning.')
-
-            // const parent = isGroup ? 'groups' : 'additional'
-
-            if (isGroup) {
-                let gname = ''
-                memo.groups = Object.assign({}, memo.groups, lines.reduce(function(lmemo: Record<string, any>, line) {
-                    if (line.indexOf(':') === -1) throw new Error('Each group or rule line must contain a colon.')
-
-                    const key = line.slice(0, line.indexOf(':')).toLowerCase().trim()
-                    const value = line.slice(line.indexOf(':') + 1).trim()
-
-                    if (key == 'user-agent') {
-                        lmemo[value] = {rules: []}
-                        gname = value
-                    }
-                    else if (validRuleNames.indexOf(key) !== -1) {
-                        lmemo[gname].rules.push({[key]: value})
-                    }
-                    else {}
-
-                    return lmemo
-                }, {}))
-            }
-            else {
-                memo.additional = lines.map(function(line) {
-                    const key = line.slice(0, line.indexOf(':')).trim()
-                    const value = line.slice(line.indexOf(':') + 1).trim()
-                    return {[key]: value}
-                })
+        if (!didContentStart) {
+            if (!/^(user-agent)/i.test(line)) {
+                if (robotstxt.groups.length > 0 && isLineParsable(line)) {
+                    const firstLineParsed = parseLine(line);
+                    robotstxt.add(firstLineParsed.key, firstLineParsed.value);
+                }
+                continue;
             }
 
-            return memo
-        }, { groups: {}, additional: [] })
+            const firstLineParsed = parseLine(line);
+            verifyUserAgentToken(firstLineParsed.key, firstLineParsed.value);
+            group = robotstxt.newGroup(firstLineParsed.value);
+            didContentStart = true;
+            continue;
+        }
 
-        this.state.valid = true
+        if (!line) {
+            group = null;
+            didContentStart = false;
+            continue;
+        }
 
-        return this
+        const { key, value } = parseLine(line);
+
+        if (isUserAgentToken(key)) group!.addUserAgent(value);
+        else if (isAllowToken(key)) group!.allow(value);
+        else if (isDisallowToken(key)) group!.disallow(value);
+        else group!.addCustomRule(key, value);
     }
 
-    valid() {
-        return this.state.valid
+    return robotstxt;
+
+    function isUserAgentToken(key: string) {
+        return key.toLowerCase() === "user-agent";
     }
 
-    clean(data: string) {
-        data = data.replace(/^[\r\n]+/g, '')
-        data = data.replace(/[\r\n]+$/g, '')
-        return data
+    function isAllowToken(key: string) {
+        return key.toLowerCase() === "allow";
+    }
+
+    function isDisallowToken(key: string) {
+        return key.toLowerCase() === "disallow";
+    }
+
+    function verifyUserAgentToken(key: string, value: string) {
+        if (key.toLowerCase() === "user-agent" && value.length > 0) return true;
+        throw new Error(
+            `The group should start with "user-agent" and have a value.`,
+        );
+    }
+
+    function isLineParsable(line: string) {
+        const i = line.indexOf(":");
+
+        return !(i === -1 || line.length < i + 1);
+    }
+
+    function parseLine(line: string) {
+        const i = line.indexOf(":");
+
+        if (i === -1 || line.length < i + 1) {
+            throw new Error(`Couldn't parse the line: "${line}".`);
+        }
+
+        const key = trimLine(line.slice(0, i));
+        const value = trimLine(line.slice(i + 1));
+        return { key, value };
+    }
+
+    function canSkipLine(line: string) {
+        // ignore line if it starts with "#"
+        return line.startsWith("#");
+    }
+
+    function trimLine(line: string) {
+        // removes white spaces and tabs from beginning and end of the line
+        return line.replace(/^[\t\s]+/, "").replace(/[\t\s]+$/, "");
     }
 }
 
-interface State {
-    data: StateData
-    valid: boolean
-}
-
-interface StateData {
-    groups: Record<string, StateDataGroup>,
-    additional: Record<string, any>[]
-}
-
-interface StateDataGroup {
-    rules: Record<string, any>[]
-}
+export type RobotsTxtGroup = {
+    ua: string[];
+    allows: string[];
+    disallows: string[];
+    customRules: Record<string, string>;
+};

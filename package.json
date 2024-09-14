@@ -1,15 +1,34 @@
 {
   "name": "robotstxt-util",
-  "version": "v3.0.0",
-  "description": "RFC 5234 spec compliant robots.txt builder and parser. 🦾",
-  "main": "build/index.js",
+  "version": "3.0.0",
+  "description": "RFC 9309 spec compliant robots.txt builder and parser. 🦾",
   "type": "module",
-  "types": "types",
-  "scripts": {
-    "precompile": "rm -rf build/*",
-    "compile": "tsc -p tsconfig.json",
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    "require": {
+      "types": "./dist/index.d.cts",
+      "default": "./dist/index.cjs"
+    },
+    "import": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
   },
+  "scripts": {
+    "lint": "eslint src",
+    "format:check": "prettier src --check",
+    "format": "prettier $(git diff --cached --name-only --diff-filter=ACMR src | sed 's| |\\\\ |g') --write --ignore-unknown",
+    "test": "vitest",
+    "build": "pkgroll --target=es2020 --target=node16.20 --sourcemap --clean-dist",
+    "prepare": "husky || true",
+    "commit": "cz"
+  },
+  "files": [
+    ".npmrc",
+    "dist/*",
+    "package.json"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/muratgozel/robotstxt-util.git"
@@ -38,16 +57,25 @@
   },
   "homepage": "https://github.com/muratgozel/robotstxt-util#readme",
   "devDependencies": {
-    "@tsconfig/node20": "^20.1.2",
-    "@tsconfig/strictest": "^2.0.1",
-    "@types/node": "^20.10.5",
-    "@typescript-eslint/eslint-plugin": "^6.15.0",
-    "eslint": "^8.45.0",
-    "eslint-config-standard-with-typescript": "^43.0.0",
-    "eslint-plugin-import": "^2.27.5",
-    "eslint-plugin-n": "^16.5.0",
-    "eslint-plugin-promise": "^6.1.1",
-    "node-releaser": "^2.1.4",
-    "typescript": "^5.1.6"
+    "@eslint/js": "^9.10.0",
+    "@semantic-release/gitlab": "13.2.1",
+    "@tsconfig/strictest": "^2.0.5",
+    "@types/node": "^22.5.4",
+    "commitizen": "^4.3.0",
+    "cz-conventional-changelog": "^3.3.0",
+    "eslint": "^9.10.0",
+    "globals": "^15.9.0",
+    "husky": "^9.1.5",
+    "pkgroll": "^2.1.1",
+    "prettier": "3.3.3",
+    "semantic-release": "24.1.0",
+    "typescript": "^5.5.2",
+    "typescript-eslint": "^8.4.0",
+    "vitest": "^1.6.0"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
   }
 }

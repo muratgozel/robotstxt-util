@@ -1,0 +1,14 @@
+steps:
+    - label: "Create Release & artifacts"
+      if: "build.tag !~ /^v[0-9]+/"
+      commands:
+          - git checkout main
+          - pnpm install --frozen-lockfile --prod=false
+          - pnpm run test
+          - pnpm run build
+          - pnpm exec semantic-release
+      env:
+          NODE_ENV: production
+          HUSKY: 0
+          GIT_USER_EMAIL: git@gozel.com.tr
+          GIT_USER_NAME: "GÖZEL"
