@@ -2,7 +2,7 @@ steps:
     - label: "Create Release & artifacts"
       if: "build.tag !~ /^v[0-9]+/"
       commands:
-          - git checkout main
+          - git checkout master
           - pnpm install --frozen-lockfile --prod=false
           - pnpm run test
           - pnpm run build
