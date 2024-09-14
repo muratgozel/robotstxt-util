@@ -1,5 +1,5 @@
 import { test, expect } from "vitest";
-import { parseRobotsTxt } from "./index";
+import { parseRobotsTxt, RobotsTxt } from "./index";
 
 test("invalid robots.txt", () => {
     const instance = parseRobotsTxt("");
@@ -146,4 +146,26 @@ test("robots.txt with additional keys", () => {
     });
     expect(instance.additions).toContainEqual(["Sitemap", "abc"]);
     expect(instance.additions).toContainEqual(["Sitemap", "def"]);
+});
+
+test("new group when group already exists", () => {
+    const robotstxt = new RobotsTxt();
+    robotstxt.newGroup("abot").allow("/a");
+    robotstxt.newGroup("bbot").allow("/b");
+    robotstxt.newGroup("bbot").allow("/c");
+
+    expect(robotstxt.groups[1]!.allows).toContainEqual("/b");
+    expect(robotstxt.groups[1]!.allows).toContainEqual("/c");
+});
+
+test("find group", () => {
+    const robotstxt = new RobotsTxt();
+    robotstxt.newGroup("abot").allow("/a");
+    robotstxt.newGroup("bbot").allow("/b");
+
+    expect(robotstxt.findGroup("cbot")).toBe(undefined);
+    expect(robotstxt.findGroup("bbot")).toMatchObject({
+        ua: ["bbot"],
+        allows: ["/b"],
+    });
 });

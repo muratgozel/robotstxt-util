@@ -29,7 +29,7 @@ allBots.disallow('/')
 
 const googleBot = robotstxt.newGroup('googlebot')
 googleBot.allow('/abc')
-googleBot.disallow('/def')
+googleBot.disallow('/def').disallow('/jkl')
 
 // specify multiple bots
 const otherBots = robotstxt.newGroup(['abot', 'bbot', 'cbot'])
@@ -75,6 +75,9 @@ Sitemap: https://yoursite/sitemap.en.xml
 Sitemap: https://yoursite/sitemap.tr.xml
 `
 const robotstxt = parseRobotsTxt(data)
+
+// update something in some group
+robotstxt.findGroup('barbot').allow('/aaa').allow('/bbb')
 
 // store as json or do whatever you want
 const json = robotstxt.json()

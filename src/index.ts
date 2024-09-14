@@ -2,30 +2,34 @@ export class RobotsTxt {
     groups: RobotsTxtGroup[] = [];
     additions: [string, string][] = [];
 
-    newGroup(userAgents: string | string[]) {
-        const self = this;
-        const group = {
-            ua: typeof userAgents === "string" ? [userAgents] : userAgents,
-            allows: [],
-            disallows: [],
-            customRules: {},
-        };
-        const index = self.groups.push(group) - 1;
+    _newGroup(userAgents: string | string[]) {
+        const group = new RobotsTxtGroup(
+            typeof userAgents === "string" ? [userAgents] : userAgents,
+        );
+        this.groups.push(group);
+        return group;
+    }
 
-        return {
-            addUserAgent(userAgent: string) {
-                self.groups[index]!.ua.push(userAgent);
-            },
-            allow(path: string) {
-                self.groups[index]!.allows.push(path);
-            },
-            disallow(path: string) {
-                self.groups[index]!.disallows.push(path);
-            },
-            addCustomRule(key: string, value: string) {
-                self.groups[index]!.customRules[key] = value;
-            },
-        };
+    newGroup(userAgent: string) {
+        if (this.groups.some(({ ua }) => ua.includes(userAgent))) {
+            const index = this.groups.findIndex(({ ua }) =>
+                ua.includes(userAgent),
+            );
+            return this.groups[index]!;
+        } else {
+            return this._newGroup(userAgent);
+        }
+    }
+
+    findGroup(userAgent: string) {
+        if (this.groups.some(({ ua }) => ua.includes(userAgent))) {
+            const index = this.groups.findIndex(({ ua }) =>
+                ua.includes(userAgent),
+            );
+            return this.groups[index]!;
+        } else {
+            return undefined;
+        }
     }
 
     add(key: string, value: string) {
@@ -63,13 +67,47 @@ export class RobotsTxt {
     }
 }
 
+export class RobotsTxtGroup {
+    ua: string[];
+    allows: string[];
+    disallows: string[];
+    customRules: Record<string, string>;
+
+    constructor(
+        ua: string[],
+        allows: string[] = [],
+        disallows: string[] = [],
+        customRules: Record<string, string> = {},
+    ) {
+        this.ua = ua;
+        this.allows = allows;
+        this.disallows = disallows;
+        this.customRules = customRules;
+    }
+
+    addUserAgent(userAgent: string) {
+        this.ua.push(userAgent);
+    }
+
+    allow(path: string) {
+        this.allows.push(path);
+    }
+
+    disallow(path: string) {
+        this.disallows.push(path);
+    }
+
+    addCustomRule(key: string, value: string) {
+        this.customRules[key] = value;
+    }
+}
+
 export function parseRobotsTxt(data: string) {
     const robotstxt = new RobotsTxt();
     const lines = data.split(/\r?\n/).map((line) => trimLine(line));
 
     let didContentStart = false;
-    let group: ReturnType<InstanceType<typeof RobotsTxt>["newGroup"]> | null =
-        null;
+    let group: InstanceType<typeof RobotsTxtGroup> | null = null;
     for (const line of lines) {
         if (canSkipLine(line)) continue;
 
@@ -152,10 +190,3 @@ export function parseRobotsTxt(data: string) {
         return line.replace(/^[\t\s]+/, "").replace(/[\t\s]+$/, "");
     }
 }
-
-export type RobotsTxtGroup = {
-    ua: string[];
-    allows: string[];
-    disallows: string[];
-    customRules: Record<string, string>;
-};
